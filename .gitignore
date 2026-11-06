@@ -21,6 +21,8 @@
 
 # Allow Standard Documentation
 !/README.md
+!/docs/
+!/docs/TOOLS.md
 !/LICENSE
 !/CHANGELOG.md
 
