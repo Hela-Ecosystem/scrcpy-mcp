@@ -24,6 +24,9 @@
 !/docs/
 !/docs/TOOLS.md
 !/LICENSE
+!/THIRD-PARTY-NOTICES
+!/LICENSES/
+!/LICENSES/**
 !/CHANGELOG.md
 
 # Ignore OS and Editor generated files inside allowed directories

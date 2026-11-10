@@ -213,3 +213,8 @@ Callers use native display coordinates (matches `wm size` and `ui_dump` bounds).
 ## License
 
 MIT
+
+The MCP wrapper is distributed under the MIT License. The bundled `classes.dex`
+contains compiled scrcpy server components from Genymobile and remains covered
+by the Apache License 2.0; see [THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES) and
+[`LICENSES/Apache-2.0`](LICENSES/Apache-2.0).

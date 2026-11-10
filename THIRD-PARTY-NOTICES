@@ -1,0 +1,7 @@
+scrcpy server binary: classes.dex
+
+This repository includes compiled scrcpy server components from Genymobile's
+scrcpy project. Those components remain covered by the Apache License 2.0.
+The applicable license text is provided in LICENSES/Apache-2.0.
+
+Upstream project: https://github.com/Genymobile/scrcpy
