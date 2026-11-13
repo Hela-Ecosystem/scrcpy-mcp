@@ -60,7 +60,12 @@ function getViewportSize(xml: string): { width: number; height: number } {
   return { width: 1080, height: 2400 }
 }
 
-export function findNearestInput(elements: UiElement[], labelTapX: number, labelTapY: number, className?: string): UiElement | null {
+export function findNearestInput(
+  elements: UiElement[],
+  labelTapX: number,
+  labelTapY: number,
+  className?: string,
+): UiElement | null {
   const targetClass = className?.endsWith("EditText") ? className : null
 
   const inputs = elements.filter(e => {
@@ -77,8 +82,10 @@ export function findNearestInput(elements: UiElement[], labelTapX: number, label
   const SCREEN_H = 2400
 
   inputs.sort((a, b) => {
-    const distA = Math.abs(a.tapX - labelTapX) / SCREEN_W + Math.abs(a.tapY - labelTapY) / SCREEN_H * 3
-    const distB = Math.abs(b.tapX - labelTapX) / SCREEN_W + Math.abs(b.tapY - labelTapY) / SCREEN_H * 3
+    const distA = Math.abs(a.tapX - labelTapX) / SCREEN_W
+      + Math.abs(a.tapY - labelTapY) / SCREEN_H * 3
+    const distB = Math.abs(b.tapX - labelTapX) / SCREEN_W
+      + Math.abs(b.tapY - labelTapY) / SCREEN_H * 3
     return distA - distB
   })
 
@@ -239,7 +246,9 @@ export function registerUiTools(server: McpServer): void {
 
         const s = await resolveSerial(serial)
         const xml = await dumpUiXml(s)
-        const results = filterElements(parseUiNodes(xml), { text, resourceId, className, contentDesc, exactMatch })
+        const results = filterElements(parseUiNodes(xml), {
+          text, resourceId, className, contentDesc, exactMatch,
+        })
 
         const structured = { count: results.length, elements: results }
         return {
@@ -283,7 +292,9 @@ export function registerUiTools(server: McpServer): void {
         openWorldHint: true,
       },
     },
-    async ({ text, resourceId, className, contentDesc, exactMatch, serial, index, preferInput }) => {
+    async ({
+      text, resourceId, className, contentDesc, exactMatch, serial, index, preferInput,
+    }) => {
       try {
         if (!text && !resourceId && !className && !contentDesc) {
           return {
@@ -295,7 +306,9 @@ export function registerUiTools(server: McpServer): void {
         const s = await resolveSerial(serial)
         const xml = await dumpUiXml(s)
         const allElements = parseUiNodes(xml)
-        const results = filterElements(allElements, { text, resourceId, className, contentDesc, exactMatch })
+        const results = filterElements(allElements, {
+          text, resourceId, className, contentDesc, exactMatch,
+        })
 
         if (results.length === 0) {
           return {
@@ -422,7 +435,9 @@ export function registerUiTools(server: McpServer): void {
 
         while (Date.now() - startTime < timeoutMs) {
           const xml = await dumpUiXml(s)
-          const results = filterElements(parseUiNodes(xml), { text, resourceId, className, contentDesc, exactMatch })
+          const results = filterElements(parseUiNodes(xml), {
+            text, resourceId, className, contentDesc, exactMatch,
+          })
 
           if (results.length > 0) {
             const msg = `Element found after ${Date.now() - startTime}ms`
@@ -474,7 +489,9 @@ export function registerUiTools(server: McpServer): void {
         openWorldHint: true,
       },
     },
-    async ({ textToType, text, resourceId, className, contentDesc, exactMatch, serial, index, pressEnter }) => {
+    async ({
+      textToType, text, resourceId, className, contentDesc, exactMatch, serial, index, pressEnter,
+    }) => {
       try {
         if (!text && !resourceId && !className && !contentDesc) {
           throw new Error("At least one search criterion must be provided")
@@ -483,7 +500,9 @@ export function registerUiTools(server: McpServer): void {
         const s = await resolveSerial(serial)
         const xml = await dumpUiXml(s)
         const allElements = parseUiNodes(xml)
-        const results = filterElements(allElements, { text, resourceId, className, contentDesc, exactMatch })
+        const results = filterElements(allElements, {
+          text, resourceId, className, contentDesc, exactMatch,
+        })
 
         if (results.length === 0) {
           return {

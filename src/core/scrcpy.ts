@@ -919,11 +919,14 @@ export async function pushScrcpyServer(serial: string, serverPath: string): Prom
   await execAdb(["-s", serial, "push", serverPath, "/data/local/tmp/scrcpy-server.jar"]);
 }
 
-export async function setupPortForwarding(serial: string, port: number, scid: number): Promise<void> {
-  const socketName = scid === -1 ? "scrcpy" : `scrcpy_${scid.toString(16).padStart(8, "0")}`;
-  // Try forward first, fallback to reverse if needed, or vice-versa depending on standard scrcpy behavior.
-  // Actually, scrcpy uses forward if reverse is not requested. Let's just use forward local to remote.
-  // forward: local port -> device localabstract
+export async function setupPortForwarding(
+  serial: string,
+  port: number,
+  scid: number,
+): Promise<void> {
+  const socketName = getSocketName(scid);
+  // Try forward first, then fall back to reverse if needed.
+  // Forward: local port -> device localabstract.
   await execAdb(["-s", serial, "forward", `tcp:${port}`, `localabstract:${socketName}`]).catch(async () => {
       await execAdb(["-s", serial, "reverse", `localabstract:${socketName}`, `tcp:${port}`]);
   });

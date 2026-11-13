@@ -15,7 +15,9 @@
  * through untouched in both modes.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { AnySchema, ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 export interface HelaArtifactRef {
   uri: string;
@@ -174,11 +176,11 @@ export function wrapError(toolName: string, message: string): HelaResult<null> {
  * are preserved. Results with no text block (image-only captures) get the
  * envelope text block prepended with `data` = structuredContent summary.
  */
-export function withEnvelope(toolName: string, result: any): any {
+export function withEnvelope(toolName: string, result: CallToolResult): CallToolResult {
   if (!isEnvelopeEnabled()) return result;
   if (!result || !Array.isArray(result.content)) return result;
   let replaced = false;
-  const content = result.content.map((block: any) => {
+  const content = result.content.map((block) => {
     if (!replaced && block && block.type === 'text' && typeof block.text === 'string') {
       replaced = true;
       let data: unknown = block.text;
@@ -202,17 +204,19 @@ export function withEnvelope(toolName: string, result: any): any {
  * Drop-in replacement for `server.registerTool(name, config, cb)` that
  * envelopes the callback result. Same 3-arg shape, first arg is the server.
  */
-export function registerEnvTool(
+export function registerEnvTool<Args extends ZodRawShapeCompat>(
   server: McpServer,
   name: string,
   config: {
     title?: string;
     description?: string;
-    inputSchema: { [k: string]: any };
-    outputSchema?: { [k: string]: any };
+    inputSchema: Args;
+    outputSchema?: ZodRawShapeCompat | AnySchema;
     annotations?: Record<string, unknown>;
   },
-  cb: (args: { [k: string]: any }) => any,
+  cb: ToolCallback<Args>,
 ): void {
-  (server as any).registerTool(name, config, async (args: any) => withEnvelope(name, await cb(args)));
+  server.registerTool(name, config, async (args, extra) => {
+    return withEnvelope(name, await cb(args, extra));
+  });
 }
