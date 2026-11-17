@@ -1,3 +1,8 @@
+## [3.0.4] - 2026-11-18
+
+### Fixed
+- The device message parser only understood clipboard frames (type 0) and treated the SET_CLIPBOARD acknowledgement (type 1, uint64 sequence) as unknown, resetting the buffer and desynchronising later reads. The parser is now a pure `consumeDeviceMessages` function covering both frame types, with unit tests.
+
 ## [3.0.3] - 2026-11-18
 
 ### Fixed

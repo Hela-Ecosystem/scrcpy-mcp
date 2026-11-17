@@ -28,6 +28,8 @@ import {
   JPEG_SOI,
   JPEG_EOI,
   DEVICE_MSG_TYPE_CLIPBOARD,
+  DEVICE_MSG_TYPE_ACK_CLIPBOARD,
+  ACK_CLIPBOARD_BYTES,
   MAX_CLIPBOARD_BYTES,
   CLIPBOARD_COPY_KEY_NONE,
   DEVICE_META_SIZE,
@@ -285,6 +287,8 @@ export interface ScrcpySession {
   // via the control socket; screenshots fall back to `adb screencap`.
   videoAvailable: boolean
   clipboardContent: string | null
+  /** Last SET_CLIPBOARD acknowledgement sequence from the device. */
+  lastClipboardAck?: number
   viewerProcess: ChildProcess | null  // the native scrcpy viewer window, if open
 }
 
@@ -857,6 +861,62 @@ const receiveDeviceMeta = async (
     socket.resume()
   })
 
+export interface DeviceMessages {
+  /** Clipboard text frames received in this buffer. */
+  clipboard: string[]
+  /** SET_CLIPBOARD acknowledgement sequences. */
+  acks: number[]
+  /** Bytes left for the next read (a partial frame). */
+  rest: Buffer
+  /** True when an unparseable frame forced a buffer reset. */
+  reset: boolean
+}
+
+/**
+ * Split the device->client control stream into whole messages.
+ *
+ * The device sends CLIPBOARD (0) frames and ACK_CLIPBOARD (1) frames. The ack
+ * carries a uint64 sequence after the type byte; treating it as unknown and
+ * dropping the buffer desynchronised later clipboard reads.
+ */
+export function consumeDeviceMessages(buffer: Buffer, maxClipboardBytes: number = MAX_CLIPBOARD_BYTES): DeviceMessages {
+  const clipboard: string[] = []
+  const acks: number[] = []
+  let rest = buffer
+  let reset = false
+
+  while (rest.length >= 5) {
+    const msgType = rest.readUInt8(0)
+
+    if (msgType === DEVICE_MSG_TYPE_CLIPBOARD) {
+      const textLength = rest.readUInt32BE(1)
+      if (textLength > maxClipboardBytes) {
+        reset = true
+        rest = Buffer.alloc(0)
+        break
+      }
+      if (rest.length < 5 + textLength) break
+      clipboard.push(rest.toString("utf8", 5, 5 + textLength))
+      rest = rest.subarray(5 + textLength)
+      continue
+    }
+
+    if (msgType === DEVICE_MSG_TYPE_ACK_CLIPBOARD) {
+      if (rest.length < ACK_CLIPBOARD_BYTES) break
+      const sequence = rest.readBigUInt64BE(1)
+      acks.push(sequence > BigInt(Number.MAX_SAFE_INTEGER) ? Number.MAX_SAFE_INTEGER : Number(sequence))
+      rest = rest.subarray(ACK_CLIPBOARD_BYTES)
+      continue
+    }
+
+    reset = true
+    rest = Buffer.alloc(0)
+    break
+  }
+
+  return { clipboard, acks, rest, reset }
+}
+
 const startDeviceMessageHandler = (session: ScrcpySession): void => {
   if (!session.controlSocket) return
 
@@ -864,35 +924,15 @@ const startDeviceMessageHandler = (session: ScrcpySession): void => {
 
   session.controlSocket.on("data", (data: Buffer) => {
     messageBuffer = Buffer.concat([messageBuffer, data])
+    const parsed = consumeDeviceMessages(messageBuffer, MAX_CLIPBOARD_BYTES)
 
-    while (messageBuffer.length >= 5) {
-      const msgType = messageBuffer.readUInt8(0)
-
-      if (msgType === DEVICE_MSG_TYPE_CLIPBOARD) {
-        const textLength = messageBuffer.readUInt32BE(1)
-
-        if (textLength > MAX_CLIPBOARD_BYTES) {
-          console.error(
-            `[scrcpy] [${session.serial}] Clipboard payload too large: ` +
-              `${textLength} bytes (max ${MAX_CLIPBOARD_BYTES}), resetting buffer`
-          )
-          messageBuffer = Buffer.alloc(0)
-          break
-        }
-
-        if (messageBuffer.length < 5 + textLength) break
-
-        const text = messageBuffer.toString("utf8", 5, 5 + textLength)
-        session.clipboardContent = text
-
-        messageBuffer = messageBuffer.subarray(5 + textLength)
-      } else {
-        console.error(
-          `[scrcpy] [${session.serial}] Unknown device message type: ${msgType}, resetting buffer`
-        )
-        messageBuffer = Buffer.alloc(0)
-      }
+    if (parsed.reset) {
+      console.error(`[scrcpy] [${session.serial}] Unparseable device message, resetting buffer`)
     }
+    for (const text of parsed.clipboard) session.clipboardContent = text
+    if (parsed.acks.length > 0) session.lastClipboardAck = parsed.acks[parsed.acks.length - 1]
+
+    messageBuffer = parsed.rest
   })
 }
 

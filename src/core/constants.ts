@@ -33,6 +33,10 @@ export const CONTROL_MSG_TYPE_ROTATE_DEVICE = 11
 export const CONTROL_MSG_TYPE_START_APP = 16
 
 export const DEVICE_MSG_TYPE_CLIPBOARD = 0
+/** Device acknowledges our SET_CLIPBOARD with a big-endian uint64 sequence. */
+export const DEVICE_MSG_TYPE_ACK_CLIPBOARD = 1
+/** 1-byte type + 8-byte sequence. */
+export const ACK_CLIPBOARD_BYTES = 9
 
 /**
  * Touch Event Actions
