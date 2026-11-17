@@ -8,9 +8,12 @@ let transport: StdioClientTransport | null = null
 export async function connectClient(): Promise<Client> {
   if (client) return client
 
+  // The server builds to dist/server.js (package.json start script). dist/index.js
+  // never existed, so this suite failed with "Connection closed" before it could
+  // exercise a device.
   transport = new StdioClientTransport({
     command: "node",
-    args: [process.cwd() + "/dist/index.js"],
+    args: [process.cwd() + "/dist/server.js"],
   })
 
   client = new Client(

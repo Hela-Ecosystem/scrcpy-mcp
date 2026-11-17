@@ -1,3 +1,12 @@
+## [3.0.3] - 2026-11-18
+
+### Fixed
+- The hardware integration harness spawned `dist/index.js`, an entrypoint that never existed, so `npm run test:integration` always failed with `Connection closed` and device validation could not run at all. It now spawns `dist/server.js`, matching the supported entrypoint.
+- `clipboard_get` on Android 10+ requires the scrcpy transport; the ADB fallback returns opaque bytes. The integration test now runs through an active session and documents the platform limit instead of asserting the fallback.
+
+### Added
+- Hardware coverage for the UI hierarchy, element discovery, app lifecycle, rotation and screen recording, verified on a Pixel 8 (18 integration tests).
+
 # Changelog
 
 All notable changes to this project.
