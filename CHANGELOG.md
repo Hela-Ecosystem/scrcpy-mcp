@@ -1,3 +1,8 @@
+## [3.0.5] - 2026-11-18
+
+### Fixed
+- Use the shared server version as the package version fallback and guard it against package.json drift.
+
 ## [3.0.4] - 2026-11-18
 
 ### Fixed

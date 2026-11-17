@@ -14,6 +14,7 @@ import { registerFileTools } from "./tools/files.js"
 import { registerVideoTools } from "./tools/video.js"
 import { createRequire } from "node:module"
 import { checkPreflight } from "./core/preflight.js"
+import { resolveServerVersion } from "./version.js"
 
 function reportPreflight(): void {
   let ffmpegStaticPath: string | null = null
@@ -30,7 +31,7 @@ function reportPreflight(): void {
 function createServer() {
   const server = new McpServer({
     name: "scrcpy-mcp",
-    version: process.env.npm_package_version ?? "3.0.4",
+    version: resolveServerVersion(process.env.npm_package_version),
   })
 
   registerSessionTools(server)
