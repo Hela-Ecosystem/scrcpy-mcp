@@ -30,7 +30,7 @@ function reportPreflight(): void {
 function createServer() {
   const server = new McpServer({
     name: "scrcpy-mcp",
-    version: process.env.npm_package_version ?? "3.0.2",
+    version: process.env.npm_package_version ?? "3.0.3",
   })
 
   registerSessionTools(server)
