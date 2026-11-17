@@ -26,13 +26,13 @@ export function registerShellTools(server: McpServer): void {
       },
     },
     async ({ command, serial }) => {
-      // P0-A3: arbitrary on-device shell is gated. Solo operators opt in with
-      // HELA_RECEPTOR_ALLOW_SHELL=true; all other receptor tools are unaffected.
+      // HELA_RECEPTOR_ALLOW_SHELL only opts in where the active HeLa profile exposes android-shell.
+      // Restricted profiles block shell_exec independently of this environment flag.
       if (process.env['HELA_RECEPTOR_ALLOW_SHELL'] !== 'true') {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify({ error: true, message: "shell_exec is disabled (set HELA_RECEPTOR_ALLOW_SHELL=true to enable)" }),
+            text: JSON.stringify({ error: true, message: "shell_exec is disabled (set HELA_RECEPTOR_ALLOW_SHELL=true when the active HeLa profile permits android-shell)" }),
           }],
           isError: true as const,
         };

@@ -169,7 +169,7 @@ All UI tools use `uiautomator dump --compressed` under the hood.
 | `SCRCPY_SERVER_PATH` | auto-detect | Path to scrcpy-server.jar |
 | `FFMPEG_PATH` | ffmpeg-static or system `ffmpeg` | ffmpeg binary |
 | `FFPLAY_PATH` | `ffplay` | ffplay binary |
-| `HELA_RECEPTOR_ALLOW_SHELL` | *unset = off* | Set to `true` to enable `shell_exec`. Off = denied (all other tools unaffected). |
+| `HELA_RECEPTOR_ALLOW_SHELL` | *unset = off* | Set to `true` to opt in to `shell_exec` when the active HeLa profile permits `android-shell`. Restricted profiles block the tool regardless of this flag. |
 | `HELA_ENVELOPE` | *unset = off* | Set to `true` to wrap tool results in the canonical HeLaResult envelope (`ok/summary/data/artifacts/provenance/warnings/sideEffects/execution`; image blocks and `structuredContent` preserved). Off = byte-identical legacy output. Run/step ids propagate from `HELA_RUN_ID`/`HELA_STEP_ID`. |
 
 ## Architecture

@@ -12,11 +12,25 @@ import { registerUiTools } from "./tools/ui.js"
 import { registerShellTools } from "./tools/shell.js"
 import { registerFileTools } from "./tools/files.js"
 import { registerVideoTools } from "./tools/video.js"
+import { createRequire } from "node:module"
+import { checkPreflight } from "./core/preflight.js"
+
+function reportPreflight(): void {
+  let ffmpegStaticPath: string | null = null
+  try {
+    ffmpegStaticPath = createRequire(import.meta.url)("ffmpeg-static")
+  } catch {
+    // ffmpeg-static is optional; the system binary remains supported.
+  }
+  const status = checkPreflight(process.env.PATH, undefined, ffmpegStaticPath)
+  const missing = [...status.missingRequired, ...status.missingOptional]
+  if (missing.length) console.error(`[scrcpy-mcp] Pre-flight missing binaries: ${missing.join("; ")}`)
+}
 
 function createServer() {
   const server = new McpServer({
     name: "scrcpy-mcp",
-    version: process.env.npm_package_version ?? "3.0.1",
+    version: process.env.npm_package_version ?? "3.0.2",
   })
 
   registerSessionTools(server)
@@ -34,6 +48,7 @@ function createServer() {
 }
 
 async function main() {
+  reportPreflight()
   const server = createServer()
   const transport = new StdioServerTransport()
   await server.connect(transport)
