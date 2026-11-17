@@ -879,7 +879,10 @@ export interface DeviceMessages {
  * carries a uint64 sequence after the type byte; treating it as unknown and
  * dropping the buffer desynchronised later clipboard reads.
  */
-export function consumeDeviceMessages(buffer: Buffer, maxClipboardBytes: number = MAX_CLIPBOARD_BYTES): DeviceMessages {
+export function consumeDeviceMessages(
+  buffer: Buffer,
+  maxClipboardBytes: number = MAX_CLIPBOARD_BYTES,
+): DeviceMessages {
   const clipboard: string[] = []
   const acks: number[] = []
   let rest = buffer
@@ -904,7 +907,9 @@ export function consumeDeviceMessages(buffer: Buffer, maxClipboardBytes: number 
     if (msgType === DEVICE_MSG_TYPE_ACK_CLIPBOARD) {
       if (rest.length < ACK_CLIPBOARD_BYTES) break
       const sequence = rest.readBigUInt64BE(1)
-      acks.push(sequence > BigInt(Number.MAX_SAFE_INTEGER) ? Number.MAX_SAFE_INTEGER : Number(sequence))
+      acks.push(
+        sequence > BigInt(Number.MAX_SAFE_INTEGER) ? Number.MAX_SAFE_INTEGER : Number(sequence),
+      )
       rest = rest.subarray(ACK_CLIPBOARD_BYTES)
       continue
     }
