@@ -3,6 +3,11 @@
 ### Fixed
 - Use the shared server version as the package version fallback and guard it against package.json drift.
 
+## [3.0.6] - 2026-11-19
+
+### Changed
+- npm audit fix clears one moderate advisory; device behaviour unchanged.
+
 ## [3.0.4] - 2026-11-18
 
 ### Fixed
