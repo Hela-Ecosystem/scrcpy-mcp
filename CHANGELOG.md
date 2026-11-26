@@ -1,12 +1,12 @@
-## [3.0.5] - 2026-11-18
-
-### Fixed
-- Use the shared server version as the package version fallback and guard it against package.json drift.
-
 ## [3.0.6] - 2026-11-19
 
 ### Changed
 - npm audit fix clears one moderate advisory; device behaviour unchanged.
+
+## [3.0.5] - 2026-11-18
+
+### Fixed
+- Use the shared server version as the package version fallback and guard it against package.json drift.
 
 ## [3.0.4] - 2026-11-18
 
@@ -26,6 +26,12 @@
 
 All notable changes to this project.
 
+## [3.0.2] - 2026-11-18
+
+### Fixed
+- Report missing host binaries and scrcpy server at startup.
+- Clarify that HeLa profile restrictions override `HELA_RECEPTOR_ALLOW_SHELL`.
+
 ## [3.0.1] - 2026-11-13
 
 ### Changed
@@ -37,10 +43,3 @@ All notable changes to this project.
 - **Version reset to 3.0.0** — per-server version metadata baseline reset (Phase 7). All `package.json`, MCP `ServerInfo.version`, and HTTP metadata now report `3.0.0`. This is a metadata/interface baseline reset; for `hela-plastid` it is not an upgrade from the previous `4.2.0` advert.
 
 # Changelog
-
-## [3.0.2] - 2026-11-18
-
-### Fixed
-- Report missing host binaries and scrcpy server at startup.
-- Clarify that HeLa profile restrictions override `HELA_RECEPTOR_ALLOW_SHELL`.
-
